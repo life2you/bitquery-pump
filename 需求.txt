@@ -1,0 +1,8 @@
+先访问https://docs.bitquery.io/docs/examples/Solana/Pump-Fun-API/ 了解所有API
+
+1.实时获取新创建的代币
+2.实时获取代币的所有相关信息
+
+我们开发一个可以能监控适合买入的工具。
+
+数据库：
