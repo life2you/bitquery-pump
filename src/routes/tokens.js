@@ -33,6 +33,64 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * @api {get} /api/tokens/stats 获取代币统计信息
+ * @apiDescription 获取代币相关的统计数据，包括今日新代币、本周新代币、潜在买入机会和总代币数量
+ * @apiName GetTokenStats
+ * @apiGroup Token
+ * 
+ * @apiSuccess {Object} stats 代币统计信息
+ * @apiSuccess {Number} stats.todayTokens 今日新代币数量
+ * @apiSuccess {Number} stats.weekTokens 本周新代币数量
+ * @apiSuccess {Number} stats.potentialBuyCount 潜在买入机会数量
+ * @apiSuccess {Number} stats.totalTokens 总代币数量
+ */
+router.get('/stats', async (req, res) => {
+  try {
+    // 调用tokenService获取统计数据
+    // 如果tokenService没有专门的getStats方法，我们可以在这里计算
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 7);
+    weekStart.setHours(0, 0, 0, 0);
+    
+    // 按时间过滤获取今日和本周代币
+    const todayTokens = await tokenService.getTokensCount({ 
+      creationTime: { $gte: todayStart.toISOString() } 
+    });
+    
+    const weekTokens = await tokenService.getTokensCount({ 
+      creationTime: { $gte: weekStart.toISOString() } 
+    });
+    
+    // 获取潜在买入机会
+    const potentialBuyCount = await tokenService.getTokensCount({ 
+      isPotentialBuy: true 
+    });
+    
+    // 获取总代币数量
+    const totalTokens = await tokenService.getTokensCount({});
+    
+    res.json({
+      todayTokens,
+      weekTokens,
+      potentialBuyCount,
+      totalTokens
+    });
+  } catch (error) {
+    console.error('获取代币统计信息失败:', error);
+    res.status(500).json({ 
+      error: '获取代币统计信息失败',
+      todayTokens: 0,
+      weekTokens: 0,
+      potentialBuyCount: 0,
+      totalTokens: 0
+    });
+  }
+});
+
+/**
  * @api {get} /api/tokens/:mintAddress 获取代币详情
  * @apiDescription 获取指定代币的详细信息
  * @apiName GetToken

@@ -608,30 +608,64 @@ class TokenService {
 
   /**
    * 更新代币信息
-   * @param {String} mintAddress 代币铸造地址
-   * @param {Object} data 更新数据
-   * @returns {Promise<Object>} 更新后的代币对象
+   * @param {String} mintAddress - 代币铸造地址
+   * @param {Object} data - 要更新的数据
+   * @returns {Object} 更新后的代币信息
    */
   async updateToken(mintAddress, data) {
     try {
-      const token = await Token.findOne({ where: { mintAddress } });
+      const [updated] = await Token.update(data, { 
+        where: { mintAddress } 
+      });
       
-      if (!token) {
-        throw new Error(`代币 ${mintAddress} 不存在`);
+      if (updated) {
+        return await this.getToken(mintAddress);
       }
-      
-      await token.update(data);
-      return token;
+      return null;
     } catch (error) {
-      console.error(`更新代币 ${mintAddress} 信息失败:`, error);
-      throw error;
+      console.error(`更新代币${mintAddress}信息失败:`, error);
+      return null;
     }
   }
 
   /**
-   * 创建新代币记录
-   * @param {Object} tokenData 代币数据
-   * @returns {Promise<Object>} 创建的代币对象
+   * 获取代币总数
+   * @param {Object} filter - 查询条件
+   * @returns {Number} 代币数量
+   */
+  async getTokensCount(filter = {}) {
+    try {
+      // 将filter中的特殊条件（如日期比较）转换为Sequelize兼容的格式
+      const sequelizeFilter = {};
+      
+      // 处理日期比较条件
+      if (filter.creationTime && filter.creationTime.$gte) {
+        sequelizeFilter.creationTime = {
+          [Op.gte]: filter.creationTime.$gte
+        };
+      }
+      
+      // 处理isPotentialBuy条件
+      if (filter.isPotentialBuy !== undefined) {
+        sequelizeFilter.isPotentialBuy = filter.isPotentialBuy;
+      }
+      
+      // 查询代币数量
+      const count = await Token.count({
+        where: sequelizeFilter
+      });
+      
+      return count;
+    } catch (error) {
+      console.error('获取代币数量失败:', error);
+      return 0;
+    }
+  }
+  
+  /**
+   * 创建新代币
+   * @param {Object} tokenData - 代币数据
+   * @returns {Object} 创建的代币信息
    */
   async createToken(tokenData) {
     try {

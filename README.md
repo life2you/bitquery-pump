@@ -115,109 +115,172 @@ Bitquery现在使用OAuth令牌进行API认证，而不是简单的API密钥。�
 
 详细说明请参考[Bitquery官方文档](https://docs.bitquery.io/docs/authorisation/how-to-generate/)
 
-### 步骤
+### 使用启动脚本（推荐）
 
 1. 克隆仓库
-
 ```bash
 git clone https://github.com/yourusername/bitquery-pump.git
 cd bitquery-pump
 ```
 
-2. 安装依赖
+2. 配置环境变量
+```bash
+cp .env.example .env
+```
+编辑 `.env` 文件，配置您的API密钥和数据库连接信息。
 
+3. 运行启动脚本
+```bash
+./start.sh
+```
+
+启动脚本会自动:
+- 检查和安装前后端依赖
+- 启动后端服务
+- 启动前端开发服务器
+- 提供访问链接
+- 支持一键停止所有服务 (Ctrl+C)
+
+### 手动启动
+
+#### 后端
+
+1. 安装依赖
 ```bash
 npm install
 ```
 
-3. 创建PostgreSQL数据库
+2. 启动服务
+```bash
+npm run dev
+```
+
+#### 前端
+
+1. 进入前端目录
+```bash
+cd src/client
+```
+
+2. 安装依赖
+```bash
+npm install
+```
+
+3. 启动开发服务器
+```bash
+npm start
+```
+
+## 访问应用
+
+- 前端: [http://localhost:3000](http://localhost:3000)
+- 后端API: [http://localhost:3001/api](http://localhost:3001/api)
+
+## 项目结构
+
+```
+bitquery-pump/
+├── src/                  # 项目源代码
+│   ├── client/           # 前端React应用
+│   │   ├── public/       # 静态文件
+│   │   ├── src/          # 源代码
+│   │   │   ├── components/   # 组件
+│   │   │   ├── pages/        # 页面组件
+│   │   │   ├── services/     # API服务
+│   │   │   ├── hooks/        # 自定义Hooks
+│   │   │   ├── utils/        # 工具函数
+│   │   │   └── styles/       # 样式文件
+│   ├── api/              # 后端API
+│   ├── services/         # 后端服务
+│   ├── models/           # 数据模型
+│   ├── utils/            # 工具函数
+│   └── index.js          # 应用入口
+├── .env                  # 环境变量
+├── .env.example          # 环境变量示例
+├── package.json          # 项目依赖
+├── start.sh              # 启动脚本
+└── README.md             # 项目文档
+```
+
+## 贡献指南
+
+1. Fork 这个仓库
+2. 创建您的特性分支 (`git checkout -b feature/amazing-feature`)
+3. 提交您的更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 打开一个 Pull Request
+
+## 许可证
+
+[MIT](LICENSE)
+
+## 联系方式
+
+如有任何问题或建议，请通过以下方式联系我们：
+
+- 邮箱: your.email@example.com
+- GitHub Issues: [https://github.com/yourusername/bitquery-pump/issues](https://github.com/yourusername/bitquery-pump/issues)
+
+## 快速开始
+
+### 使用服务管理脚本
+
+我们提供了两个服务管理脚本，分别用于控制前端和后端服务。
+
+#### 后端服务管理
 
 ```bash
-# 使用PostgreSQL命令行或管理工具创建数据库
-createdb bitquery_pump
+# 启动后端服务
+./backend.sh start
+
+# 停止后端服务
+./backend.sh stop
+
+# 重启后端服务
+./backend.sh restart
+
+# 查看后端服务状态
+./backend.sh status
+
+# 查看日志
+./backend.sh logs         # 显示完整日志
+./backend.sh logs tail    # 实时跟踪最新日志
+./backend.sh logs last    # 显示最后50行日志
+./backend.sh logs last 100 # 显示最后100行日志
+./backend.sh logs 50      # 显示前50行日志
+./backend.sh logs clear   # 清空日志
 ```
 
-4. 配置环境变量
-
-复制`.env.example`文件为`.env`并编辑相关配置：
+#### 前端服务管理
 
 ```bash
-cp .env.example .env
-# 编辑.env文件，填写BITQUERY_API_KEY(OAuth令牌)和数据库配置
+# 启动前端服务
+./frontend.sh start
+
+# 停止前端服务
+./frontend.sh stop
+
+# 重启前端服务
+./frontend.sh restart
+
+# 查看前端服务状态
+./frontend.sh status
+
+# 查看日志
+./frontend.sh logs         # 显示完整日志
+./frontend.sh logs tail    # 实时跟踪最新日志
+./frontend.sh logs last    # 显示最后50行日志
+./frontend.sh logs last 100 # 显示最后100行日志
+./frontend.sh logs 50      # 显示前50行日志
+./frontend.sh logs clear   # 清空日志
 ```
 
-5. 启动应用
+这些脚本自动处理进程管理、依赖安装和错误恢复等功能，让服务管理变得简单。
 
-```bash
-npm run dev  # 开发模式
-# 或
-npm start    # 生产模式
-```
+### 日志文件位置
 
-## API端点
+- 前端日志: `src/frontend.log`
+- 后端日志: `backend.log`
 
-### 代币API
-
-- `GET /api/tokens` - 获取代币列表
-- `GET /api/tokens/:mintAddress` - 获取代币详情
-- `GET /api/tokens/:mintAddress/trades` - 获取代币交易历史
-- `GET /api/tokens/:mintAddress/holders` - 获取代币持有者列表
-
-### WebSocket事件
-
-- `new-token` - 当新代币被创建时触发
-
-## Docker部署
-
-您也可以使用Docker运行此应用：
-
-```bash
-# 构建Docker镜像
-docker build -t bitquery-pump .
-
-# 运行容器
-docker run -d -p 3000:3000 --env-file .env bitquery-pump
-```
-
-## 配置Docker Compose (使用PostgreSQL)
-
-```yaml
-version: '3'
-services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    depends_on:
-      - db
-    environment:
-      - NODE_ENV=production
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_NAME=bitquery_pump
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - BITQUERY_API_KEY=your_oauth_token_here  # 请替换为您的OAuth令牌
-
-  db:
-    image: postgres:13
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=bitquery_pump
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-```
-
-## 许可
-
-MIT
-
-## 贡献
-
-欢迎贡献和提出问题！请提交PR或创建Issue。
+这些日志文件包含了服务运行过程中的详细信息，对于故障排查和性能监控非常有用。
